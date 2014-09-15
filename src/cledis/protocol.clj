@@ -59,6 +59,12 @@
   [^BufferedReader reader]
   (read-line-crlf reader))
 
+; Simple integer
+; Ex: ":1000\r\n"
+(defmethod parse-reply \:
+  [^BufferedReader reader]
+  (Integer/parseInt (read-line-crlf reader)))
+
 ; Bulk string
 ; Ex: "$6\r\nfoobar\r\n"
 (defmethod parse-reply \$
