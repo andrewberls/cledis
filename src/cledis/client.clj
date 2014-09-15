@@ -34,40 +34,25 @@
     (send-command socket (inline-command command args)))
 
 
-; TODO: bulk generation needs refactoring
-
 (defn- bulk-element
-  "Format a single bulk string element"
+  "Format a single bulk string element given either a string or a number"
   [arg]
   (let [bytecount (count (str arg))]
     (str "$" bytecount "\r\n" arg "\r\n")))
 
 
-(defn- bulk-elements
-  "Format a vector of bulk string elements"
-  [^clojure.lang.PersistentVector args]
-  (string/join "" (map bulk-element args)))
-
-
-(defn- bulk-prefix
-  "Format the length prefix for a vector of elements"
-  [^clojure.lang.PersistentVector args]
-  (let [elem-count (+ (count args) 1)]
-    (str "*" elem-count "\r\n")))
-
-
 (defn- bulk-command
-  "Generate a bulk string command"
+  "Format a RESP array command"
   [^String command, ^clojure.lang.PersistentVector args]
-  (str (bulk-prefix args)
-       (bulk-element command)
-       (bulk-elements args)))
+  (let [prefix   (str "*" (inc (count args)) "\r\n")
+       elements (map bulk-element args)]
+   (str prefix (bulk-element command) (string/join "" elements))))
 
 
 (defn- send-bulk-command
   "Send a bulk sstring command over a socket"
   [socket command & more]
-  (let [args (flatten more)]
+  (let [args (remove nil? (flatten more))]
     (send-command socket (bulk-command command args))))
 
 
@@ -86,12 +71,14 @@
 
 ; Connection commands
 
-(defn ping [conn] (send-inline-command conn "PING"))
+(defn ping [conn]
+  (send-inline-command conn "PING"))
 
 
 ; Server Commands
 
-(defn flushdb [conn] (send-inline-command conn "FLUSHDB"))
+(defn flushdb [conn]
+  (send-inline-command conn "FLUSHDB"))
 
 
 ; String commands
@@ -102,9 +89,11 @@
 ; bitpos key bit [start] [end]
 ; decr key
 ; decrby key decrement
-(defn get [conn key] (send-inline-command conn "GET" key))
+(defn get [conn key]
+  (send-inline-command conn "GET" key))
 
-(defn getbit [conn key offset] (send-inline-command conn "GETBIT" key offset))
+(defn getbit [conn key offset]
+  (send-inline-command conn "GETBIT" key offset))
 
 ; getrange key start end
 ; getset key value
@@ -127,7 +116,8 @@
 ; setex key seconds value
 ; setnx key value
 ; setrange key offset value
-(defn strlen [conn key] (send-inline-command conn "STRLEN" key))
+(defn strlen [conn key]
+  (send-inline-command conn "STRLEN" key))
 
 
 ; Hash commands

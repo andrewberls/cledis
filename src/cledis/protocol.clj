@@ -61,12 +61,12 @@
 ; Ex: "$6\r\nfoobar\r\n"
 (defmethod parse-reply \$
   [^BufferedReader reader]
-  (let [bytecount (Integer/parseInt (read-line-crlf reader))]
-    (if (< bytecount 0)
+  (let [byte-count (Integer/parseInt (read-line-crlf reader))]
+    (if (< byte-count 0)
       nil ; Null bulk string
-      (let [^chars cbuf (char-array bytecount)]
+      (let [^chars cbuf (char-array byte-count)]
         (do
-          (.read reader cbuf 0 bytecount)
+          (.read reader cbuf 0 byte-count)
           (read-crlf reader)
           (String. cbuf))))))
 
@@ -74,13 +74,16 @@
 ; Ex: "*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"
 (defmethod parse-reply \*
   [^BufferedReader reader]
-  ["TODO"])
+  (let [elem-count (Integer/parseInt (read-line-crlf reader))]
+    (loop [elems [], i elem-count]
+     (if (zero? i)
+       elems
+       (recur (conj elems (parse-reply reader)) (dec i))))))
 
 ; Error
 (defmethod parse-reply \-
   [^BufferedReader reader]
   (read-line-crlf reader))
-
 
 
 (defn read-reply
