@@ -23,7 +23,7 @@
 
 (defn inline-command
   "Generate an inline command string"
-  [command args]
+  [^String command, ^clojure.lang.PersistentVector args]
   (let [cmd (string/join " " (cons command args))]
     (str cmd "\r\n")))
 
@@ -100,8 +100,11 @@
 ; incr key
 ; incrby key increment
 ; incrbyfloat key increment
-; mget key [key ...]
-; mset key value [key value ...]
+(defn mget [conn key & more]
+  (send-bulk-command conn "MGET" key more))
+
+(defn mset [conn key value & more]
+  (send-bulk-command conn "MSET" key value more))
 ; msetnx key value [key value ...]
 ; psetex key milliseconds value
 
