@@ -72,15 +72,11 @@
   (let [bytecount (Integer/parseInt (read-line-crlf reader))]
     (if (< bytecount 0)
       nil ; Null bulk string
-      ; TODO: .read cbuf[] instead
-      (loop [char-buf [], i bytecount]
-        (let [c (.read reader)]
-          (if (= i 0)
-            (do
-              (read-crlf reader)
-              (clojure.string/join "" char-buf)
-            )
-            (recur (conj char-buf (char c)) (dec i))))))))
+      (let [^chars cbuf (char-array bytecount)]
+        (do
+          (.read reader cbuf 0 bytecount)
+          (read-crlf reader)
+          (String. cbuf))))))
 
 ; Error
 (defmethod parse-reply \-
