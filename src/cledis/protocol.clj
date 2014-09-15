@@ -3,14 +3,6 @@
            [java.net Socket]))
 
 
-; Request construction
-
-(defn inline-command
-  ^String [^String command, args]
-  (let [cmd (clojure.string/join " " (cons command args))]
-    (str cmd "\r\n")))
-
-
 ; Reply parsing
 
 (defn- cr? [c] (= c 0x0d))
@@ -78,10 +70,17 @@
           (read-crlf reader)
           (String. cbuf))))))
 
+; Array
+; Ex: "*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"
+(defmethod parse-reply \*
+  [^BufferedReader reader]
+  ["TODO"])
+
 ; Error
 (defmethod parse-reply \-
   [^BufferedReader reader]
   (read-line-crlf reader))
+
 
 
 (defn read-reply

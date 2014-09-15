@@ -13,4 +13,6 @@
     (prn (redis/getbit conn "bittest" 2))   ; 0
     (prn (redis/setbit conn "bittest" 2 1)) ; 0
     (prn (redis/getbit conn "bittest" 2))   ; 1
+    (prn (redis/hmset conn "myhash" "one" 1 "two" 2)) ; OK
+    (prn (redis/hmget conn "myhash" "one")) ; 1
     ))
